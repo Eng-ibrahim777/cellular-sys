@@ -1,0 +1,2683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Cellular Signal System</title>
+
+<!-- Import Inter font via Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+
+    font-family:
+        'Inter',
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #f4f8f6 0%,
+            #e9f2ee 35%,
+            #dfeae5 100%
+        );
+
+    color:#2b3a32;
+
+    min-height:100vh;
+
+    overflow-x:hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+/* =========================================================
+   DARK MODE STYLES
+   ========================================================= */
+
+body.dark-mode {
+    background:
+        radial-gradient(
+            circle at top,
+            #141f1a 0%,
+            #0b1310 35%,
+            #040705 100%
+        );
+    color: #d1e8dc;
+}
+
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .chart-panel,
+body.dark-mode .info,
+body.dark-mode .status {
+    background: #121c17;
+    border-color: rgba(0,180,100,.25);
+    color: #d1e8dc;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+body.dark-mode .logo h1,
+body.dark-mode .chart-title,
+body.dark-mode .card-value,
+body.dark-mode .info-value {
+    color: #e2f4ed;
+}
+
+body.dark-mode .logo p,
+body.dark-mode .chart-subtitle,
+body.dark-mode .chart-info,
+body.dark-mode .card-title,
+body.dark-mode .info-label,
+body.dark-mode .card-unit {
+    color: #8fb3a2;
+}
+
+body.dark-mode .waiting-box {
+    background: rgba(11,19,16,.95);
+    color: #d1e8dc;
+    border-color: rgba(0,180,100,.3);
+}
+
+body.dark-mode .waiting-title {
+    color: #e2f4ed;
+}
+
+body.dark-mode .action-btn {
+    background: #00994d;
+    color: #fff;
+}
+
+body.dark-mode .action-btn:hover {
+    background: #00b359;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: #00b359;
+    color: #fff;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0,179,89,0.2);
+}
+
+.action-btn:hover {
+    background: #00994d;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   CUSTOM MODAL STYLES
+   ========================================================= */
+
+.custom-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.custom-modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.custom-modal {
+    background: #ffffff;
+    border: 1px solid rgba(0,180,100,.2);
+    border-radius: 18px;
+    padding: 25px 30px;
+    width: min(400px, 90%);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.custom-modal-overlay.show .custom-modal {
+    transform: translateY(0);
+}
+
+body.dark-mode .custom-modal {
+    background: #121c17;
+    border-color: rgba(0,180,100,.3);
+    color: #d1e8dc;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.custom-modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #12261d;
+    margin-bottom: 10px;
+}
+
+body.dark-mode .custom-modal-title {
+    color: #e2f4ed;
+}
+
+.custom-modal-message {
+    font-size: 14px;
+    color: #587a69;
+    margin-bottom: 20px;
+}
+
+body.dark-mode .custom-modal-message {
+    color: #8fb3a2;
+}
+
+.custom-modal-btn {
+    background: #00b359;
+    color: #fff;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(0,179,89,0.2);
+}
+
+.custom-modal-btn:hover {
+    background: #00994d;
+}
+
+
+/* =========================================================
+   MAIN CONTAINER
+   ========================================================= */
+
+.container{
+
+    width:94%;
+
+    max-width:1450px;
+
+    margin:auto;
+
+    padding:25px 0 40px;
+
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    margin-bottom:25px;
+
+    padding:20px 25px;
+
+    border:
+        1px solid
+        rgba(0,180,100,.15);
+
+    border-radius:18px;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+
+        0 10px 30px
+        rgba(0,0,0,.04),
+
+        inset 0 0 10px
+        rgba(0,180,100,.01);
+
+}
+
+
+.logo h1{
+
+    font-size:28px;
+
+    letter-spacing:2px;
+    
+    color:#12261d;
+
+}
+
+
+.logo p{
+
+    color:#587a69;
+
+    margin-top:6px;
+
+    font-size:13px;
+
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:10px 15px;
+
+    border-radius:30px;
+
+    background:#f2f7f4;
+
+    border:
+        1px solid
+        rgba(0,180,100,.18);
+
+    font-size:13px;
+    
+    color:#2b3a32;
+
+}
+
+body.dark-mode .status {
+    background: #0b1310;
+}
+
+
+.status-dot{
+
+    width:11px;
+
+    height:11px;
+
+    border-radius:50%;
+
+    background:#777;
+
+    box-shadow:
+        0 0 0 transparent;
+
+}
+
+
+.status-dot.online{
+
+    background:#00b359;
+
+    box-shadow:
+        0 0 12px rgba(0,179,89,.4);
+
+    animation:
+        pulse 1.5s infinite;
+
+}
+
+
+.status-dot.offline{
+
+    background:#e63939;
+
+    box-shadow:
+        0 0 14px
+        rgba(230,57,57,.4);
+
+    animation:
+        offlinePulse 1s infinite;
+
+}
+
+
+@keyframes pulse{
+
+    0%,100%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.4;
+    }
+
+}
+
+
+@keyframes offlinePulse{
+
+    0%,100%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.45;
+    }
+
+}
+
+
+/* =========================================================
+   SERVICE DOWN ALERT
+   ========================================================= */
+
+.service-down-alert{
+
+    position:fixed;
+
+    top:25px;
+
+    left:50%;
+
+    transform:
+        translateX(-50%)
+        translateY(-180px);
+
+    width:min(700px,92%);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:20px 25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,235,235,.98),
+            rgba(255,220,220,.98)
+        );
+
+    border:
+        2px solid
+        #e63939;
+
+    border-radius:18px;
+
+    box-shadow:
+
+        0 0 35px
+        rgba(230,57,57,.2),
+
+        0 15px 45px
+        rgba(0,0,0,.1);
+
+    z-index:9999;
+
+    opacity:0;
+
+    transition:
+
+        transform .45s
+        cubic-bezier(.2,.8,.2,1),
+
+        opacity .35s ease;
+
+    pointer-events:none;
+
+}
+
+
+.service-down-alert.show{
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+
+    opacity:1;
+
+    animation:
+
+        alertShake .45s ease,
+
+        alertGlow 1.5s
+        infinite alternate;
+
+}
+
+
+/* ALERT ICON */
+
+.alert-icon{
+
+    width:58px;
+
+    height:58px;
+
+    min-width:58px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#e63939;
+
+    color:#fff;
+
+    box-shadow:
+        0 0 20px
+        rgba(230,57,57,.4);
+
+    animation:
+        alertIconPulse 1s infinite;
+
+}
+
+
+/* ALERT CONTENT */
+
+.alert-content{
+
+    flex:1;
+
+}
+
+
+.alert-title{
+
+    color:#c92a2a;
+
+    font-size:23px;
+
+    font-weight:900;
+
+    letter-spacing:2px;
+
+}
+
+
+.alert-message{
+
+    color:#5c2b2b;
+
+    font-size:14px;
+
+    margin-top:5px;
+
+}
+
+
+.alert-time{
+
+    color:#8c4040;
+
+    font-size:11px;
+
+    margin-top:7px;
+
+    letter-spacing:.5px;
+
+}
+
+
+/* ALERT ANIMATIONS */
+
+@keyframes alertGlow{
+
+    from{
+
+        box-shadow:
+
+            0 0 25px
+            rgba(230,57,57,.15),
+
+            0 15px 45px
+            rgba(0,0,0,.1);
+
+    }
+
+    to{
+
+        box-shadow:
+
+            0 0 40px
+            rgba(230,57,57,.35),
+
+            0 15px 45px
+            rgba(0,0,0,.1);
+
+    }
+
+}
+
+
+@keyframes alertIconPulse{
+
+    0%,100%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.08);
+
+    }
+
+}
+
+
+@keyframes alertShake{
+
+    0%{
+
+        transform:
+            translateX(-50%)
+            translateY(0);
+
+    }
+
+    25%{
+
+        transform:
+            translateX(calc(-50% - 5px))
+            translateY(0);
+
+    }
+
+    50%{
+
+        transform:
+            translateX(calc(-50% + 5px))
+            translateY(0);
+
+    }
+
+    75%{
+
+        transform:
+            translateX(calc(-50% - 3px))
+            translateY(0);
+
+    }
+
+    100%{
+
+        transform:
+            translateX(-50%)
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+.metrics{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:18px;
+
+    margin-bottom:22px;
+
+}
+
+
+.card{
+
+    position:relative;
+
+    padding:22px;
+
+    min-height:145px;
+
+    border-radius:18px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        rgba(0,180,100,.12);
+
+    box-shadow:
+        0 10px 25px
+        rgba(0,0,0,.03);
+
+    overflow:hidden;
+
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.25s ease;
+
+}
+
+.card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -6px rgba(0,0,0,0.1);
+}
+
+.card.signal-good {
+    border-color: rgba(0, 163, 82, 0.4);
+    box-shadow: 0 0 15px rgba(0, 163, 82, 0.12), 0 10px 25px rgba(0,0,0,.03);
+}
+
+.card.signal-medium {
+    border-color: rgba(217, 155, 0, 0.4);
+    box-shadow: 0 0 15px rgba(217, 155, 0, 0.12), 0 10px 25px rgba(0,0,0,.03);
+}
+
+.card.signal-bad {
+    border-color: rgba(230, 57, 57, 0.4);
+    box-shadow: 0 0 15px rgba(230, 57, 57, 0.12), 0 10px 25px rgba(0,0,0,.03);
+}
+
+
+.card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:100%;
+
+    height:3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #00b359,
+            transparent
+        );
+
+    opacity:.7;
+
+}
+
+
+/* =========================================================
+   DISTANCE CARD ACCENT (SKY BLUE)
+   ========================================================= */
+
+.card.distance-card::before {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #38bdf8,
+            transparent
+        );
+}
+
+.card.distance-card {
+    border-color: rgba(56, 189, 248, 0.25);
+}
+
+.card.distance-card:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    box-shadow: 0 12px 24px -6px rgba(56, 189, 248, 0.12);
+}
+
+#distanceValue {
+    color: #0284c7;
+}
+
+body.dark-mode .card.distance-card {
+    border-color: rgba(56, 189, 248, 0.3);
+    background: #111b17;
+}
+
+body.dark-mode #distanceValue {
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+
+.card-title{
+
+    color:#507362;
+
+    font-size:12px;
+
+    letter-spacing:-0.01em;
+
+    font-weight: 500;
+
+    text-transform:uppercase;
+
+}
+
+
+.card-value{
+
+    margin-top:17px;
+
+    font-size:35px;
+
+    font-weight:bold;
+
+    transition:.3s;
+
+    color:#12261d;
+
+}
+
+
+.card-unit{
+
+    color:#698f7d;
+
+    font-size:13px;
+
+    margin-left:5px;
+
+}
+
+
+.card-value.signal-good{
+
+    color:#00a352;
+
+    text-shadow:
+        0 0 10px
+        rgba(0,163,82,.15);
+
+}
+
+
+.card-value.signal-medium{
+
+    color:#d99b00;
+
+    text-shadow:
+        0 0 10px
+        rgba(217,155,0,.15);
+
+}
+
+
+.card-value.signal-bad{
+
+    color:#e63939;
+
+    text-shadow:
+        0 0 10px
+        rgba(230,57,57,.15);
+
+}
+
+
+/* =========================================================
+   CHART PANEL
+   ========================================================= */
+
+.chart-panel{
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        rgba(0,180,100,.12);
+
+    border-radius:20px;
+
+    padding:24px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.03);
+
+}
+
+
+.chart-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:20px;
+
+    gap:15px;
+
+}
+
+
+.chart-title{
+
+    font-size:19px;
+
+    font-weight:bold;
+    
+    color:#12261d;
+
+}
+
+
+.chart-subtitle{
+
+    color:#587a69;
+
+    font-size:12px;
+
+    margin-top:5px;
+
+}
+
+
+.chart-info{
+
+    display:flex;
+
+    gap:15px;
+
+    color:#587a69;
+
+    font-size:12px;
+
+}
+
+
+.chart-wrapper{
+
+    position:relative;
+
+    width:100%;
+
+    height:500px;
+
+}
+
+
+#rssiChart{
+
+    width:100%!important;
+
+    height:100%!important;
+
+}
+
+
+/* =========================================================
+   WAITING OVERLAY
+   ========================================================= */
+
+.waiting{
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    pointer-events:none;
+
+    z-index:5;
+
+}
+
+
+.waiting-box{
+
+    padding:18px 28px;
+
+    border-radius:14px;
+
+    background:
+        rgba(255,255,255,.9);
+
+    border:
+        1px solid
+        rgba(0,180,100,.2);
+
+    color:#385747;
+
+    text-align:center;
+
+    backdrop-filter:blur(8px);
+
+    box-shadow: 0 10px 25px rgba(0,0,0,.05);
+
+}
+
+
+.waiting-title{
+
+    font-weight:bold;
+
+    color:#1f3b2d;
+
+    letter-spacing:1px;
+
+    margin-bottom:7px;
+
+}
+
+
+.waiting-text{
+
+    font-size:12px;
+
+}
+
+
+/* =========================================================
+   INFO BAR
+   ========================================================= */
+
+.info-bar{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+
+.info{
+
+    padding:16px;
+
+    border-radius:15px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        rgba(0,180,100,.1);
+
+    box-shadow: 0 5px 15px rgba(0,0,0,.02);
+
+}
+
+
+.info-label{
+
+    color:#587a69;
+
+    font-size:11px;
+
+    margin-bottom:8px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+}
+
+
+.info-value{
+
+    font-size:17px;
+
+    font-weight:bold;
+    
+    color:#12261d;
+
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer{
+
+    text-align:center;
+
+    color:#698f7d;
+
+    font-size:11px;
+
+    margin-top:25px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1000px){
+
+    .metrics{
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+}
+
+
+@media(max-width:650px){
+
+    .container{
+
+        width:95%;
+
+        padding-top:12px;
+
+    }
+
+
+    .header{
+
+        padding:17px;
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+
+    .logo h1{
+
+        font-size:21px;
+
+    }
+
+
+    .metrics{
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:10px;
+
+    }
+
+
+    .card{
+
+        padding:16px;
+
+        min-height:125px;
+
+    }
+
+
+    .card-value{
+
+        font-size:27px;
+
+    }
+
+
+    .chart-panel{
+
+        padding:15px;
+
+    }
+
+
+    .chart-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+
+    .chart-info{
+
+        flex-wrap:wrap;
+
+    }
+
+
+    .chart-wrapper{
+
+        height:430px;
+
+    }
+
+
+    .info-bar{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .service-down-alert{
+
+        top:12px;
+
+        width:94%;
+
+        padding:15px;
+
+        gap:12px;
+
+    }
+
+
+    .alert-icon{
+
+        width:48px;
+
+        height:48px;
+
+        min-width:48px;
+
+    }
+
+
+    .alert-title{
+
+        font-size:18px;
+
+    }
+
+
+    .alert-message{
+
+        font-size:12px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
+     CUSTOM MODAL (NEAT ALERT)
+     ======================================================= -->
+
+<div id="customModalOverlay" class="custom-modal-overlay">
+    <div class="custom-modal">
+        <div class="custom-modal-title">Alert</div>
+        <div id="customModalMessage" class="custom-modal-message">No recorded readings available to export.</div>
+        <button class="custom-modal-btn" onclick="closeCustomModal()">OK</button>
+    </div>
+</div>
+
+
+<!-- =======================================================
+     SERVICE DOWN ALERT
+     ======================================================= -->
+
+<div id="serviceDownAlert"
+     class="service-down-alert">
+
+    <div class="alert-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+    </div>
+
+    <div class="alert-content">
+
+        <div class="alert-title">
+            SERVICE DOWN
+        </div>
+
+        <div class="alert-message">
+            The monitoring system has lost connection
+        </div>
+
+        <div id="alertTime"
+             class="alert-time">
+
+            Connection lost
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     MAIN
+     ======================================================= -->
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div class="logo">
+
+            <h1>
+                Cellular SIGNAL MONITOR
+            </h1>
+
+            <p>
+                 Received Signal Strength Indicator (RSSI) Monitoring System
+            </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button class="action-btn" onclick="exportToPDF()" title="Export readings to PDF">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export PDF
+            </button>
+
+            <button class="action-btn" onclick="toggleDarkMode()" id="darkModeBtn" title="Toggle Dark/Light Mode">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                Dark Mode
+            </button>
+
+            <div class="status">
+
+                <div id="statusDot"
+                     class="status-dot">
+                </div>
+
+                <span id="statusText">
+                    WAITING FOR SYSTEM
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         METRICS
+         =================================================== -->
+
+    <div class="metrics">
+
+
+        <!-- RSSI -->
+
+        <div class="card" id="rssiCard">
+
+            <div class="card-title">
+                Signal Strength
+            </div>
+
+            <div id="rssiValue"
+                 class="card-value">
+
+                --
+                <span class="card-unit">
+                    dBm
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- DISTANCE -->
+
+        <div class="card distance-card">
+
+            <div class="card-title">
+                Distance
+            </div>
+
+            <div id="distanceValue"
+                 class="card-value">
+
+                --
+                <span class="card-unit">
+                    m
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- SAMPLES -->
+
+        <div class="card">
+
+            <div class="card-title">
+                Samples
+            </div>
+
+            <div id="sampleValue"
+                 class="card-value">
+
+                0
+
+            </div>
+
+        </div>
+
+
+        <!-- LAST UPDATE -->
+
+        <div class="card">
+
+            <div class="card-title">
+                Last Update
+            </div>
+
+            <div id="lastUpdate"
+                 class="card-value"
+                 style="font-size:22px;">
+
+                WAITING
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         CHART
+         =================================================== -->
+
+    <div class="chart-panel">
+
+
+        <div class="chart-header">
+
+
+            <div>
+
+                <div class="chart-title">
+
+                    RSSI SIGNAL GRAPH
+
+                </div>
+
+                <div class="chart-subtitle">
+
+                    Completed session history —
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-info">
+
+                <span>
+                    Range: 0 to -120 dBm
+                </span>
+
+                <span id="chartCount">
+                    0 readings
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="chart-wrapper">
+
+
+            <canvas id="rssiChart">
+            </canvas>
+
+
+            <!-- Waiting overlay -->
+
+            <div id="waitingOverlay"
+                 class="waiting">
+
+                <div class="waiting-box">
+
+                    <div class="waiting-title">
+
+                        WAITING FOR SYSTEM
+
+                    </div>
+
+                    <div class="waiting-text">
+
+                        Start ESP32 / ESP8266
+                        to receive live readings
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         INFORMATION
+         =================================================== -->
+
+    <div class="info-bar">
+
+
+        <div class="info">
+
+            <div class="info-label">
+                Minimum RSSI
+            </div>
+
+            <div id="minRSSI"
+                 class="info-value">
+
+                --
+
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <div class="info-label">
+                Maximum RSSI
+            </div>
+
+            <div id="maxRSSI"
+                 class="info-value">
+
+                --
+
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <div class="info-label">
+                System
+            </div>
+
+            <div id="systemState"
+                 class="info-value">
+
+                STANDBY
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="footer">
+
+        BY → ENGINEER IBRAHIM J.
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   BLYNK CONFIGURATION
+   ========================================================= */
+
+const BLYNK_TOKEN =
+    "GFhkQP3cZXMNzN8UJzQgEmskTjnkdR18";
+
+const BLYNK_SERVER =
+    "https://blynk.cloud";
+
+
+/* =========================================================
+   AUDIO ALERTS SYSTEM
+   ========================================================= */
+
+let audioCtx = null;
+let offlineBeepInterval = null;
+let weakBeepInterval = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+document.addEventListener('click', initAudio, { once: true });
+document.addEventListener('touchstart', initAudio, { once: true });
+
+function playBeep(frequency, duration, type = 'sine') {
+    try {
+        initAudio();
+        if (!audioCtx) return;
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.value = frequency;
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {
+        console.error("Audio play error:", e);
+    }
+}
+
+function stopAudioAlerts() {
+    if (offlineBeepInterval) {
+        clearInterval(offlineBeepInterval);
+        offlineBeepInterval = null;
+    }
+    if (weakBeepInterval) {
+        clearInterval(weakBeepInterval);
+        weakBeepInterval = null;
+    }
+}
+
+function startOfflineAudioAlert() {
+    if (offlineBeepInterval) return;
+    stopAudioAlerts();
+    
+    offlineBeepInterval = setInterval(() => {
+        playBeep(880, 0.4, 'sawtooth');
+    }, 600);
+}
+
+function startWeakSignalAudioAlert() {
+    if (weakBeepInterval) return;
+    stopAudioAlerts();
+    
+    weakBeepInterval = setInterval(() => {
+        playBeep(440, 0.15, 'sine');
+    }, 1500);
+}
+
+
+/* =========================================================
+   SYSTEM VARIABLES
+   ========================================================= */
+
+let rssiHistory = [];
+let distanceHistory = [];
+let timestampHistory = [];
+let sessionLog = []; // Stores both online readings and system down / phone disconnection events for PDF report
+
+let peakRSSI = null;
+
+let systemOnline = false;
+
+
+/* =========================================================
+   CUSTOM MODAL & EXPORT FUNCTIONS
+   ========================================================= */
+
+function showCustomModal(message) {
+    document.getElementById('customModalMessage').textContent = message;
+    document.getElementById('customModalOverlay').classList.add('show');
+}
+
+function closeCustomModal() {
+    document.getElementById('customModalOverlay').classList.remove('show');
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const btn = document.getElementById('darkModeBtn');
+    if (isDark) {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Light Mode`;
+    } else {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Dark Mode`;
+    }
+}
+
+function exportToPDF() {
+    if (sessionLog.length === 0 && rssiHistory.length === 0) {
+        showCustomModal("No recorded readings available to export.");
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(18, 38, 29);
+    doc.text("Cellular Signal Monitor - Session Report", 14, 20);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(88, 122, 105);
+    doc.text("Exported on: " + new Date().toLocaleString(), 14, 28);
+    
+    const tableRows = [];
+    const sourceData = sessionLog.length > 0 ? sessionLog : rssiHistory;
+    
+    for (let i = 0; i < sourceData.length; i++) {
+        if (sessionLog.length > 0) {
+            const item = sessionLog[i];
+            tableRows.push([
+                i + 1,
+                item.day,
+                item.date,
+                item.time,
+                item.status,
+                item.rssi,
+                item.distance
+            ]);
+        } else {
+            const ts = timestampHistory[i] || {};
+            tableRows.push([
+                i + 1,
+                ts.day || "",
+                ts.date || "",
+                ts.time || "",
+                "ONLINE",
+                rssiHistory[i] + " dBm",
+                (distanceHistory[i] !== undefined ? distanceHistory[i] : "--") + " m"
+            ]);
+        }
+    }
+    
+    doc.autoTable({
+        startY: 34,
+        head: [['#', 'Day', 'Date', 'Time (H:M:S)', 'Status', 'RSSI', 'Distance']],
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 179, 89] },
+        styles: { font: 'helvetica', fontSize: 10 }
+    });
+    
+    doc.save("rf_signal_monitor_session.pdf");
+}
+
+
+/* =========================================================
+   DOM ELEMENTS
+   ========================================================= */
+
+const rssiValue =
+    document.getElementById(
+        "rssiValue"
+    );
+
+
+const distanceValue =
+    document.getElementById(
+        "distanceValue"
+    );
+
+
+const sampleValue =
+    document.getElementById(
+        "sampleValue"
+    );
+
+
+const lastUpdate =
+    document.getElementById(
+        "lastUpdate"
+    );
+
+
+const minRSSI =
+    document.getElementById(
+        "minRSSI"
+    );
+
+
+const maxRSSI =
+    document.getElementById(
+        "maxRSSI"
+    );
+
+
+const systemState =
+    document.getElementById(
+        "systemState"
+    );
+
+
+const statusText =
+    document.getElementById(
+        "statusText"
+    );
+
+
+const statusDot =
+    document.getElementById(
+        "statusDot"
+    );
+
+
+const waitingOverlay =
+    document.getElementById(
+        "waitingOverlay"
+    );
+
+
+const chartCount =
+    document.getElementById(
+        "chartCount"
+    );
+
+
+const serviceDownAlert =
+    document.getElementById(
+        "serviceDownAlert"
+    );
+
+
+const alertTime =
+    document.getElementById(
+        "alertTime"
+    );
+
+
+/* =========================================================
+   RSSI COLOR
+   ========================================================= */
+
+function getSignalClass(rssi){
+
+    if(rssi >= -60){
+
+        return "signal-good";
+
+    }
+
+
+    if(rssi >= -79){
+
+        return "signal-medium";
+
+    }
+
+
+    return "signal-bad";
+
+}
+
+
+/* =========================================================
+   CHART
+   ========================================================= */
+
+const ctx =
+    document
+        .getElementById(
+            "rssiChart"
+        )
+        .getContext("2d");
+
+
+const gradient =
+    ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        500
+    );
+
+
+gradient.addColorStop(
+    0,
+    "rgba(0,179,89,0.35)"
+);
+
+gradient.addColorStop(
+    0.5,
+    "rgba(0,179,89,0.1)"
+);
+
+gradient.addColorStop(
+    1,
+    "rgba(0,179,89,0.0)"
+);
+
+
+const rssiChart =
+    new Chart(
+        ctx,
+        {
+
+            type:"line",
+
+            data:{
+
+                labels:[],
+
+                datasets:[
+
+                    {
+
+                        label:"RSSI",
+
+                        data:[],
+
+                        segment: {
+                            borderColor: ctx => {
+                                const y = ctx.p1.parsed.y;
+                                if (y >= -60) return '#00b359'; // الأخضر
+                                if (y >= -79) return '#d99b00'; // الأصفر
+                                return '#e63939'; // الأحمر
+                            }
+                        },
+
+                        backgroundColor:
+                            gradient,
+
+                        borderWidth:4,
+
+                        fill:true,
+
+                        tension:.38,
+
+                        cubicInterpolationMode:
+                            "monotone",
+
+                        pointRadius:2,
+
+                        pointHoverRadius:6
+
+                    }
+
+                ]
+
+            },
+
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+
+                animation:{
+
+                    duration:650,
+
+                    easing:
+                        "easeOutQuart"
+
+                },
+
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+
+                plugins:{
+
+                    legend:{
+
+                        display:false
+
+                    },
+
+
+                    tooltip:{
+
+                        backgroundColor:
+                            "rgba(255,255,255,.95)",
+
+                        borderColor:
+                            "rgba(0,179,89,.35)",
+
+                        borderWidth:1,
+
+                        titleColor:
+                            "#00b359",
+
+                        bodyColor:
+                            "#2b3a32",
+
+
+                        callbacks:{
+
+                            label:function(
+                                context
+                            ){
+
+                                return (
+                                    " RSSI: " +
+                                    context.parsed.y +
+                                    " dBm"
+                                );
+
+                            }
+
+                        }
+
+                    },
+
+                    annotation: {
+                        annotations: {
+                            zoneGood: {
+                                type: 'box',
+                                yMin: 0,
+                                yMax: -60,
+                                backgroundColor: 'rgba(0, 179, 89, 0.05)',
+                                borderColor: 'transparent'
+                            },
+                            zoneMedium: {
+                                type: 'box',
+                                yMin: -61,
+                                yMax: -79,
+                                backgroundColor: 'rgba(217, 155, 0, 0.05)',
+                                borderColor: 'transparent'
+                            },
+                            zoneBad: {
+                                type: 'box',
+                                yMin: -80,
+                                yMax: -120,
+                                backgroundColor: 'rgba(230, 57, 57, 0.05)',
+                                borderColor: 'transparent'
+                            },
+                            thresholdLine: {
+                                type: 'line',
+                                yMin: -80,
+                                yMax: -80,
+                                borderColor: 'rgba(230, 57, 57, 0.75)',
+                                borderWidth: 2,
+                                borderDash: [6, 6],
+                                label: {
+                                    display: true,
+                                    content: 'Weak Signal Threshold (-80 dBm)',
+                                    position: 'start',
+                                    backgroundColor: 'rgba(230, 57, 57, 0.85)',
+                                    color: '#fff',
+                                    font: {
+                                        size: 11,
+                                        family: 'Inter'
+                                    },
+                                    padding: 4
+                                }
+                            }
+                        }
+                    }
+
+                },
+
+
+                scales:{
+
+                    x:{
+
+                        ticks:{
+
+                            color:"#587a69",
+
+                            maxTicksLimit:12
+
+                        },
+
+
+                        grid:{
+
+                            color:
+                                "rgba(0,0,0,.025)"
+
+                        }
+
+                    },
+
+
+                    y:{
+
+                        min:-120,
+
+                        max:0,
+
+
+                        ticks:{
+
+                            stepSize:10,
+
+                            color:"#587a69",
+
+
+                            callback:function(
+                                value
+                            ){
+
+                                return (
+                                    value +
+                                    " dBm"
+                                );
+
+                            }
+
+                        },
+
+
+                        grid:{
+
+                            color:
+                                "rgba(0,0,0,.035)"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   OFFLINE
+   ========================================================= */
+
+function setOffline(){
+
+    systemOnline = false;
+
+    startOfflineAudioAlert();
+
+    statusText.textContent =
+        "SERVICE DOWN";
+
+
+    statusDot.className =
+        "status-dot offline";
+
+
+    waitingOverlay.style.display =
+        "none";
+
+
+    systemState.textContent =
+        "OFFLINE";
+
+
+    rssiValue.innerHTML =
+        '-- <span class="card-unit">dBm</span>';
+
+
+    rssiValue.className =
+        "card-value";
+
+    const rssiCard = document.getElementById("rssiCard");
+    if(rssiCard) rssiCard.className = "card";
+
+
+    distanceValue.innerHTML =
+        '-- <span class="card-unit">m</span>';
+
+
+    lastUpdate.textContent =
+        "OFFLINE";
+
+
+    sampleValue.textContent =
+        rssiHistory.length;
+
+
+    chartCount.textContent =
+        rssiHistory.length +
+        " readings";
+
+
+    if(rssiHistory.length > 0){
+
+        const minimum =
+            Math.min(
+                ...rssiHistory
+            );
+
+
+        const maximum =
+            Math.max(
+                ...rssiHistory
+            );
+
+
+        minRSSI.textContent =
+            minimum.toFixed(0) +
+            " dBm";
+
+
+        maxRSSI.textContent =
+            maximum.toFixed(0) +
+            " dBm";
+
+    }
+
+
+    serviceDownAlert.classList.add(
+        "show"
+    );
+
+
+    const now =
+        new Date();
+
+
+    alertTime.textContent =
+        "Connection lost at " +
+        now.toLocaleTimeString();
+
+}
+
+
+/* =========================================================
+   ONLINE
+   ========================================================= */
+
+function setOnline(){
+
+    systemOnline = true;
+
+
+    statusText.textContent =
+        "SYSTEM ONLINE";
+
+
+    statusDot.className =
+        "status-dot online";
+
+
+    systemState.textContent =
+        "ONLINE";
+
+
+    serviceDownAlert.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   CHECK BLYNK HARDWARE
+   ========================================================= */
+
+async function checkHardwareConnection(){
+
+    try{
+
+        const response =
+            await fetch(
+
+                BLYNK_SERVER +
+                "/external/api/isHardwareConnected?token=" +
+                encodeURIComponent(
+                    BLYNK_TOKEN
+                ),
+
+                {
+                    cache:"no-store"
+                }
+
+            );
+
+
+        if(!response.ok){
+
+            return false;
+
+        }
+
+
+        const text =
+            await response.text();
+
+
+        return (
+            text.trim() ===
+            "true"
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Hardware connection error:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   READ BLYNK PIN
+   ========================================================= */
+
+async function readBlynk(pin){
+
+    const response =
+        await fetch(
+
+            BLYNK_SERVER +
+            "/external/api/get?token=" +
+            encodeURIComponent(
+                BLYNK_TOKEN
+            ) +
+            "&" +
+            pin,
+
+            {
+                cache:"no-store"
+            }
+
+        );
+
+
+    if(!response.ok){
+
+        throw new Error(
+            "Blynk API error"
+        );
+
+    }
+
+
+    const text =
+        await response.text();
+
+
+    return parseFloat(
+        text
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE SYSTEM
+   ========================================================= */
+
+async function updateSystem(){
+
+    const now = new Date();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = days[now.getDay()];
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const dayNum = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${dayNum}`;
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}:${seconds}`;
+
+    try{
+
+        const hardwareConnected =
+            await checkHardwareConnection();
+
+
+        if(!hardwareConnected){
+
+            if (systemOnline) {
+                systemOnline = false;
+                sessionLog.push({
+                    day: dayName,
+                    date: dateStr,
+                    time: timeStr,
+                    status: "OFFLINE (Phone Disconnected)",
+                    rssi: "--",
+                    distance: "--"
+                });
+            }
+
+            setOffline();
+
+            return;
+
+        }
+
+
+        const onlinePin =
+            await readBlynk(
+                "V2"
+            );
+
+
+        if(
+            isNaN(onlinePin) ||
+            onlinePin !== 1
+        ){
+
+            if (systemOnline) {
+                systemOnline = false;
+                sessionLog.push({
+                    day: dayName,
+                    date: dateStr,
+                    time: timeStr,
+                    status: "OFFLINE (System Down)",
+                    rssi: "--",
+                    distance: "--"
+                });
+            }
+
+            setOffline();
+
+            return;
+
+        }
+
+
+        setOnline();
+
+
+        const rssi =
+            await readBlynk(
+                "V0"
+            );
+
+
+        const distance =
+            await readBlynk(
+                "V1"
+            );
+
+
+        if(
+            isNaN(rssi) ||
+            isNaN(distance)
+        ){
+
+            if (systemOnline) {
+                systemOnline = false;
+                sessionLog.push({
+                    day: dayName,
+                    date: dateStr,
+                    time: timeStr,
+                    status: "OFFLINE (Data Error)",
+                    rssi: "--",
+                    distance: "--"
+                });
+            }
+
+            setOffline();
+
+            return;
+
+        }
+
+
+        if (rssi < -80) {
+            startWeakSignalAudioAlert();
+        } else {
+            stopAudioAlerts();
+        }
+
+
+        rssiValue.innerHTML =
+            rssi.toFixed(0) +
+            ' <span class="card-unit">dBm</span>';
+
+
+        rssiValue.className =
+            "card-value " +
+            getSignalClass(
+                rssi
+            );
+
+        const rssiCard = document.getElementById("rssiCard");
+        if(rssiCard) {
+            rssiCard.className = "card " + getSignalClass(rssi);
+        }
+
+
+        distanceValue.innerHTML =
+            distance.toFixed(2) +
+            ' <span class="card-unit">m</span>';
+
+
+        rssiHistory.push(
+            rssi
+        );
+
+        distanceHistory.push(
+            distance
+        );
+
+
+        timestampHistory.push({
+            day: dayName,
+            date: dateStr,
+            time: timeStr
+        });
+
+        // Record successful online reading in sessionLog for PDF report
+        sessionLog.push({
+            day: dayName,
+            date: dateStr,
+            time: timeStr,
+            status: "ONLINE",
+            rssi: rssi.toFixed(0) + " dBm",
+            distance: distance.toFixed(2) + " m"
+        });
+
+
+        if(
+            peakRSSI === null ||
+            rssi > peakRSSI
+        ){
+
+            peakRSSI =
+                rssi;
+
+        }
+
+
+        const minimum =
+            Math.min(
+                ...rssiHistory
+            );
+
+
+        const maximum =
+            Math.max(
+                ...rssiHistory
+            );
+
+
+        minRSSI.textContent =
+            minimum.toFixed(0) +
+            " dBm";
+
+
+        maxRSSI.textContent =
+            maximum.toFixed(0) +
+            " dBm";
+
+
+        sampleValue.textContent =
+            rssiHistory.length;
+
+
+        chartCount.textContent =
+            rssiHistory.length +
+            " readings";
+
+
+        lastUpdate.textContent =
+            timeStr;
+
+
+        rssiChart.data.labels.push(
+            timeStr
+        );
+
+
+        rssiChart.data.datasets[0].data.push(
+            rssi
+        );
+
+
+        rssiChart.update();
+
+
+    }
+
+    catch(error){
+
+        console.error(
+            "System Error:",
+            error
+        );
+
+        if (systemOnline) {
+            systemOnline = false;
+            sessionLog.push({
+                day: dayName,
+                date: dateStr,
+                time: timeStr,
+                status: "OFFLINE (System Error)",
+                rssi: "--",
+                distance: "--"
+            });
+        }
+
+        setOffline();
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIAL STATE
+   ========================================================= */
+
+setOffline();
+
+
+/* =========================================================
+   FIRST UPDATE
+   ========================================================= */
+
+updateSystem();
+
+
+/* =========================================================
+   UPDATE EVERY SECOND
+   ========================================================= */
+
+setInterval(
+    updateSystem,
+    1000
+);
+
+</script>
+
+</body>
+</html>
